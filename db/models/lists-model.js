@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Task = require('./tasks-model');
 
 const listSchema = mongoose.Schema({
     name:{
