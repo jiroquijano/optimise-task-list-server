@@ -28,6 +28,11 @@ router.get('/api/task/:id', async(req,res)=>{
 });
 
 //Updates a task
+// req.body = {
+//  "name": String,
+//  "description": String,
+//  "deadline": Date
+//  }
 router.patch('/api/task/update/:id', async (req,res) => {
     try {
         //trim the request and only get allowed fields to update
@@ -76,6 +81,6 @@ router.delete('/api/task/:id', async (req,res) => {
         console.log(error.message);
         res.status(500).send({error:error.message});
     }
-})
+});
 
 module.exports = router;

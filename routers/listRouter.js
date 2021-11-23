@@ -6,6 +6,9 @@ const _ = require('lodash');
 const mongoose = require('mongoose');
 
 //Creates a new list
+//  req.body = {
+//      "name": String
+//  }
 router.post('/api/list', async(req,res)=>{
     const newList = new List({name: req.body.name});
     try{
@@ -41,6 +44,11 @@ router.get('/api/list/:name', async(req,res)=>{
 })
 
 //Creates a task under a specific list
+// req.body = {
+//  "name": String,
+//  "description": String,
+//  "deadline": Date
+//  }
 router.post('/api/list/:name/newtask', async (req,res)=>{
     try {
         //check first if list with specific name exists
