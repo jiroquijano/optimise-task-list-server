@@ -32,13 +32,27 @@ describe('task router', () => {
     });
 
     describe('PATCH /api/task/complete/:id', () => {
+        const originalConsoleLog = console.log;
         beforeEach(async()=>{
+            delete console.log;
+            console = {
+                log: jest.fn()
+            }
             await initializeDBWithPopulatedList();
         });
+
+        afterAll(()=>{
+            console.log = originalConsoleLog;
+        })
 
         test("Should be able to change the task state to DONE", async () => {
             const res = await request(app).patch(`/api/task/complete/${taskFixtureId}`).send().expect(200);
             expect(res.body.state).toBe('DONE');
+        });
+        test("Should send mock email when task state is set to DONE", async () => {
+            const res = await request(app).patch(`/api/task/complete/${taskFixtureId}`).send().expect(200);
+            expect(res.body.state).toBe('DONE');
+            expect(console.log).lastCalledWith(`[EMAIL SENT][${taskFixtureId}] Task1 task COMPLETED!`)
         });
     });
 });

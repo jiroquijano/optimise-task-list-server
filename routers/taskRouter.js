@@ -31,6 +31,7 @@ router.patch('/api/task/complete/:id', async (req,res) => {
         if(task.state === 'DONE') return res.status(200).send(task);
         task.state = 'DONE';
         await task.save();
+        console.log(`[EMAIL SENT][${task._id}] ${task.name} task COMPLETED!`)
         res.status(200).send(task);
     } catch (error) {
         console.log(error.message);
