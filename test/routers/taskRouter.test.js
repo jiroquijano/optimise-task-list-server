@@ -5,6 +5,44 @@ const mongoose = require('mongoose');
 
 describe('task router', () => {
 
+    describe('GET /api/tasks', () => {
+        beforeEach(async() => {
+            await initializeDBWithPopulatedList();
+        });
+        test("Should be able to fetch all existing tasks", async () => {
+            const res = await request(app).get('/api/tasks').send().expect(200);
+            expect(res.body).toEqual([
+                {
+                    _id: expect.anything(),
+                    name: 'Task1',
+                    description: 'sample description',
+                    deadline: expect.anything(),
+                    state: 'ONGOING',
+                    __v: 0
+                }
+            ]);
+        });
+    });
+
+    describe('GET /api/task/:id', () => {
+        beforeEach(async() => {
+            await initializeDBWithPopulatedList();
+        });
+        test("Should be able to fetch task by id", async () => {
+            const res = await request(app).get(`/api/task/${taskFixtureId}`).send().expect(200);
+            expect(res.body).toEqual(
+                {
+                    _id: String(taskFixtureId),
+                    name: 'Task1',
+                    description: 'sample description',
+                    deadline: expect.anything(),
+                    state: 'ONGOING',
+                    __v: 0
+                }
+            );
+        });
+    });
+
     describe('PATCH /api/task/update/:id', () => {
 
         beforeEach(async() => {
