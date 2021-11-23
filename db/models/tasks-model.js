@@ -20,7 +20,7 @@ const taskSchema = mongoose.Schema({
     },
     state: {
         type: String,
-        enum: ['ONGOING', 'DONE'],
+        enum: ['ONGOING', 'DONE', 'DUE'],
         default: 'ONGOING',
     }
 });
