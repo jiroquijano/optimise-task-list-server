@@ -3,7 +3,6 @@ const List = require('../db/models/lists-model');
 const Task = require('../db/models/tasks-model');
 const router = new express.Router();
 
-
 //Creates a new list
 router.post('/api/list', async(req,res)=>{
     const newList = new List({name: req.body.name});
@@ -43,7 +42,7 @@ router.get('/api/list/:name', async(req,res)=>{
 router.post('/api/list/:name/task', async (req,res)=>{
     try {
         //check first if list with specific name exists
-        let list = await List.findOne({name: req.params.name}).populate('tasks');
+        const list = await List.findOne({name: req.params.name}).populate('tasks');
         if(!list) return res.status(404).send({message: `list '${req.params.name}' not found!`});
         //if list exists create new task
         const newTask = new Task({
@@ -56,12 +55,13 @@ router.post('/api/list/:name/task', async (req,res)=>{
         //add to list and save
         list.tasks.push(newTask._id);
         await list.save();
-        list = await List.findOne({name: req.params.name}).populate('tasks'); //fetch updated list
-        res.status(201).send(list);
+        const updatedList = await List.findOne({name: req.params.name}).populate('tasks'); //fetch updated list
+        res.status(201).send(updatedList);
     } catch (error) {
         console.log(error.message);
         res.status(500).send({error:error.message});
     }
-})
+});
+
 
 module.exports = router;

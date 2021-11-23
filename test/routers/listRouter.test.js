@@ -4,6 +4,10 @@ const {initializeEmptyDB, initializeDBWithEmptyList} = require('../helpers/db-fi
 
 describe('list router', () => {
     
+    afterAll(async()=>{
+        await initializeEmptyDB();
+    });
+
     describe('POST /api/list', () => {
         const route = '/api/list';
         let req;

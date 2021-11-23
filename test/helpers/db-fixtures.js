@@ -15,19 +15,32 @@ const sampleEmptyListFixture = {
     name: 'List1'
 }
 
+const sampleListFixtureWithTask = {
+    _id: mongoose.Types.ObjectId(),
+    name: 'List2',
+    tasks: [taskFixtureId]
+}
+
+
 const initializeEmptyDB = async () => {
     await List.deleteMany({});
     await Task.deleteMany({});
 }
 
-const initializeDBWithEmptyList = async () => {
-    await List.deleteMany({});
-    await Task.deleteMany({});
+const initializeDBWithPopulatedList = async () => {
+    initializeEmptyDB();
     await new Task(sampleTaskFixture).save();
+    await new List(sampleListFixtureWithTask).save();
+}
+
+const initializeDBWithEmptyList = async () => {
+    initializeEmptyDB();
     await new List(sampleEmptyListFixture).save();
 }
 
 module.exports = {
     initializeEmptyDB,
-    initializeDBWithEmptyList
+    initializeDBWithEmptyList,
+    initializeDBWithPopulatedList,
+    taskFixtureId
 }
