@@ -46,8 +46,8 @@ describe('list router', () => {
         });
     });
 
-    describe('POST /api/list/:name/task', () => {
-        let route = '/api/list/List1/task';
+    describe('POST /api/list/:name/newtask', () => {
+        let route = '/api/list/List1/newtask';
         beforeEach(async () => {
             await initializeDBWithEmptyList();
         });
@@ -63,7 +63,7 @@ describe('list router', () => {
             }));
         });
         test("Should respond with 404 when queried list doesn't exist", async () => {
-            route = '/api/list/INVALIDLISTNAME/task'
+            route = '/api/list/INVALIDLISTNAME/newtask'
             const res = await request(app).post(route).send({
                 name: 'new-task',
                 description: 'sample description',

@@ -39,7 +39,7 @@ router.get('/api/list/:name', async(req,res)=>{
 })
 
 //Creates a task under a specific list
-router.post('/api/list/:name/task', async (req,res)=>{
+router.post('/api/list/:name/newtask', async (req,res)=>{
     try {
         //check first if list with specific name exists
         const list = await List.findOne({name: req.params.name}).populate('tasks');
