@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../../app.js');
-const {initializeEmptyDB, initializeDBWithPopulatedList, taskFixtureId} = require('../helpers/db-fixtures');
+const {initializeDBWithPopulatedList, taskFixtureId} = require('../helpers/db-fixtures');
 const mongoose = require('mongoose');
 
 describe('task router', () => {
@@ -13,14 +13,12 @@ describe('task router', () => {
 
         test("Should be able to update an existing task using the task _id", async () => {
             const res = await request(app).patch(`/api/task/update/${taskFixtureId}`).send({
-                name: 'updated-name',
+                title: 'updated-name',
                 description: 'updated description',
                 deadline: '1999-01-01'
             }).expect(200);
-            expect(res.body).toEqual(expect.objectContaining({
-                name: 'updated-name',
-                description: 'updated description'
-            }))
+            expect(res.body.title).toBe('updated-name');
+            expect(res.body.description).toBe('updated description');
         });
 
         test("Should reject with 404 if task id does not exist", async () => {

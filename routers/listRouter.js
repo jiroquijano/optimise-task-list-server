@@ -2,6 +2,8 @@ const express = require('express');
 const List = require('../db/models/lists-model');
 const Task = require('../db/models/tasks-model');
 const router = new express.Router();
+const _ = require('lodash');
+const mongoose = require('mongoose');
 
 //Creates a new list
 router.post('/api/list', async(req,res)=>{
@@ -46,7 +48,7 @@ router.post('/api/list/:name/newtask', async (req,res)=>{
         if(!list) return res.status(404).send({message: `list '${req.params.name}' not found!`});
         //if list exists create new task
         const newTask = new Task({
-            name: req.body.name,
+            title: req.body.title,
             description: req.body.description,
             deadline: req.body.deadline, 
             listLocation: list._id //assign fetched list id as task's list location
@@ -62,6 +64,21 @@ router.post('/api/list/:name/newtask', async (req,res)=>{
         res.status(500).send({error:error.message});
     }
 });
+
+//Deletes a list and its tasks
+router.delete('/api/list/:name', async(req,res)=>{
+    try {
+        const list = await List.findOne({name: req.params.name}).populate('tasks');
+        if(!list) return res.status(404).send({message: `list '${req.params.name}' not found!`});
+        await Task.deleteMany({listLocation: list._id});
+        const listCopy = _.cloneDeep(list);
+        await List.deleteOne({_id: list._id});
+        res.status(200).send(listCopy);
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send({error:error.message});
+    }
+})
 
 
 module.exports = router;
