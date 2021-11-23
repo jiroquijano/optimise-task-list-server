@@ -81,7 +81,7 @@ describe('task router', () => {
 
         afterAll(()=>{
             console.log = originalConsoleLog;
-        })
+        });
 
         test("Should be able to change the task state to DONE", async () => {
             const res = await request(app).patch(`/api/task/complete/${taskFixtureId}`).send().expect(200);
@@ -91,6 +91,23 @@ describe('task router', () => {
             const res = await request(app).patch(`/api/task/complete/${taskFixtureId}`).send().expect(200);
             expect(res.body.state).toBe('DONE');
             expect(console.log).lastCalledWith(`[EMAIL SENT][${taskFixtureId}] Task1 task COMPLETED!`)
+        });
+    });
+
+    describe('DELETE /api/task/:id', () => {
+        beforeEach(async()=>{
+            await initializeDBWithPopulatedList();
+        });
+        test("Should be able to delete a task using the task id", async () => {
+            const res = await request(app).delete(`/api/task/${taskFixtureId}`).send().expect(200);
+            expect(res.body).toEqual({
+                _id: String(taskFixtureId),
+                name: 'Task1',
+                description: 'sample description',
+                deadline: expect.anything(),
+                state: 'ONGOING',
+                __v: 0
+            });
         });
     });
 });

@@ -2,6 +2,7 @@ const express = require('express');
 const Task = require('../db/models/tasks-model');
 const router = new express.Router();
 const {updateTaskRequestWhiteList} = require('../utils/utilities');
+const _ = require('lodash');
 
 //Gets all existing tasks
 router.get('/api/tasks', async (req,res) => {
@@ -62,5 +63,19 @@ router.patch('/api/task/complete/:id', async (req,res) => {
         res.status(500).send({error:error.message});
     }
 });
+
+//Deletes a task with id
+router.delete('/api/task/:id', async (req,res) => {
+    try {
+        const task = await Task.findOne({_id: req.params.id});
+        if(!task) return res.status(404).send({error: `task not found`});
+        const taskCopy = _.cloneDeep(task);
+        await Task.deleteOne({_id: req.params.id});
+        res.status(200).send(taskCopy);
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send({error:error.message});
+    }
+})
 
 module.exports = router;
