@@ -53,19 +53,19 @@ describe('list router', () => {
         });
         test("Should be able to add a task to existing list", async () => {
             const res = await request(app).post(route).send({
-                title: 'new-task',
+                name: 'new-task',
                 description: 'sample description',
                 deadline: '2021-01-01'
             }).expect(201);
             expect(res.body.tasks[0]).toEqual(expect.objectContaining({
-                title:'new-task',
+                name:'new-task',
                 description: 'sample description'
             }));
         });
         test("Should respond with 404 when queried list doesn't exist", async () => {
             route = '/api/list/INVALIDLISTNAME/newtask'
             const res = await request(app).post(route).send({
-                title: 'new-task',
+                name: 'new-task',
                 description: 'sample description',
                 deadline: '2021-01-01'
             }).expect(404);

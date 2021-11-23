@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const taskFixtureId = mongoose.Types.ObjectId();
 const sampleTaskFixture = {
     _id: taskFixtureId,
-    title: 'Task1',
+    name: 'Task1',
     description: 'sample description',
     deadline: '01/01/2021'
 }

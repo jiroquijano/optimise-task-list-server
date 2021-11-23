@@ -48,7 +48,7 @@ router.post('/api/list/:name/newtask', async (req,res)=>{
         if(!list) return res.status(404).send({message: `list '${req.params.name}' not found!`});
         //if list exists create new task
         const newTask = new Task({
-            title: req.body.title,
+            name: req.body.name,
             description: req.body.description,
             deadline: req.body.deadline, 
             listLocation: list._id //assign fetched list id as task's list location

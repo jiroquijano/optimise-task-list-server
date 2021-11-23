@@ -13,11 +13,11 @@ describe('task router', () => {
 
         test("Should be able to update an existing task using the task _id", async () => {
             const res = await request(app).patch(`/api/task/update/${taskFixtureId}`).send({
-                title: 'updated-name',
+                name: 'updated-name',
                 description: 'updated description',
                 deadline: '1999-01-01'
             }).expect(200);
-            expect(res.body.title).toBe('updated-name');
+            expect(res.body.name).toBe('updated-name');
             expect(res.body.description).toBe('updated description');
         });
 
