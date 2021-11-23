@@ -4,15 +4,13 @@ const {initializeEmptyDB, initializeDBWithPopulatedList, taskFixtureId} = requir
 const mongoose = require('mongoose');
 
 describe('task router', () => {
-    beforeAll(async() => {
-        await initializeDBWithPopulatedList();
-    });
-
-    afterAll(async()=>{
-        await initializeEmptyDB();
-    });
 
     describe('PATCH /api/task/:id', () => {
+
+        beforeEach(async() => {
+            await initializeDBWithPopulatedList();
+        });
+
         test("Should be able to update an existing task using the task _id", async () => {
             const res = await request(app).patch(`/api/task/${taskFixtureId}`).send({
                 name: 'updated-name',
@@ -33,5 +31,16 @@ describe('task router', () => {
         test("Should reject with 500 if task id is not a valid ObjectId", async()=>{
             await request(app).patch('/api/task/notavalidobjectid').send().expect(500);
         });
-    })
+    });
+
+    describe('PATCH /api/task/:id/complete', () => {
+        beforeEach(async()=>{
+            await initializeDBWithPopulatedList();
+        });
+
+        test("Should be able to change the task state to DONE", async () => {
+            const res = await request(app).patch(`/api/task/${taskFixtureId}/complete`).send().expect(200);
+            expect(res.body.state).toBe('DONE');
+        });
+    });
 });

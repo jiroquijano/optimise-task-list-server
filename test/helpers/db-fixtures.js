@@ -28,13 +28,13 @@ const initializeEmptyDB = async () => {
 }
 
 const initializeDBWithPopulatedList = async () => {
-    initializeEmptyDB();
+    await initializeEmptyDB();
     await new Task(sampleTaskFixture).save();
     await new List(sampleListFixtureWithTask).save();
 }
 
 const initializeDBWithEmptyList = async () => {
-    initializeEmptyDB();
+    await initializeEmptyDB();
     await new List(sampleEmptyListFixture).save();
 }
 

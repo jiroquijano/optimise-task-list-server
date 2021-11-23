@@ -3,10 +3,6 @@ const app = require('../../app.js');
 const {initializeEmptyDB, initializeDBWithEmptyList} = require('../helpers/db-fixtures');
 
 describe('list router', () => {
-    
-    afterAll(async()=>{
-        await initializeEmptyDB();
-    });
 
     describe('POST /api/list', () => {
         const route = '/api/list';
