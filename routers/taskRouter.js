@@ -3,6 +3,7 @@ const Task = require('../db/models/tasks-model');
 const router = new express.Router();
 const {updateTaskRequestWhiteList} = require('../utils/utilities');
 const _ = require('lodash');
+const List = require('../db/models/lists-model');
 
 //Gets all existing tasks
 router.get('/api/tasks', async (req,res) => {
@@ -77,6 +78,33 @@ router.delete('/api/task/:id', async (req,res) => {
         const taskCopy = _.cloneDeep(task);
         await Task.deleteOne({_id: req.params.id});
         res.status(200).send(taskCopy);
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send({error:error.message});
+    }
+});
+
+//Deletes multiple tasks
+//  req.body = {
+//      "tasks": Task ID []
+//  }
+router.delete('/api/tasks', async (req,res) => {
+    try {
+        if(_.isEmpty(req.body.tasks)) return res.status(200).send({message: 'no tasks to delete'});
+        const deletedTasks = await Promise.all(req.body.tasks.map(async (taskID)=>{
+            const task = await Task.findOne({_id: taskID});
+            if(!task) return null;
+            const list = await List.findOne({_id: task.listLocation});
+            if(!list) return null;
+            list.tasks.splice(list.tasks.indexOf(task._id), 1);
+            await List.updateOne({_id: list._id},{tasks: list.tasks});
+            const result = await Task.deleteOne({_id: taskID});
+            if(result) return taskID;
+        }));
+        const tasksDeleted = deletedTasks.filter((task) => task);
+        res.status(200).send({
+            tasksDeleted
+        });
     } catch (error) {
         console.log(error.message);
         res.status(500).send({error:error.message});

@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../../app.js');
-const {initializeDBWithPopulatedList, taskFixtureId} = require('../helpers/db-fixtures');
+const {initializeDBWithPopulatedList, initializeDBWithMultipleTasks, taskFixtureId} = require('../helpers/db-fixtures');
 const mongoose = require('mongoose');
 
 describe('task router', () => {
@@ -108,6 +108,30 @@ describe('task router', () => {
                 state: 'ONGOING',
                 __v: 0
             });
+        });
+    });
+
+    describe('DELETE /api/tasks', () => {
+        let arrayOfObjectIds = [];
+
+        beforeEach(async()=>{
+            for(let i = 0; i < 4; ++i){
+                arrayOfObjectIds.push(String(mongoose.Types.ObjectId()).split('"')[0]);
+            };
+            await initializeDBWithMultipleTasks(arrayOfObjectIds);
+        });
+        test("Should be able to delete tasks specified in the req.body.tasks", async()=>{
+            const res = await request(app).delete('/api/tasks').send({
+                tasks: [...arrayOfObjectIds]
+            }).expect(200);
+            expect(res.body).toEqual({tasksDeleted: arrayOfObjectIds});
+        });
+
+        test("Should respond with message 'no tasks to delete' when req.body.tasks is empty", async()=>{
+            const res = await request(app).delete('/api/tasks').send({
+                tasks: []
+            }).expect(200);
+            expect(res.body.message).toBe('no tasks to delete');
         });
     });
 });
