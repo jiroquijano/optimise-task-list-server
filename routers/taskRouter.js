@@ -36,13 +36,10 @@ router.get('/api/task/:id', async(req,res)=>{
 //  }
 router.patch('/api/task/update/:id', async (req,res) => {
     try {
-        //trim the request and only get allowed fields to update
-        const allowedModifications = updateTaskRequestWhiteList(req.body);
-        //check if task exists 
-        const task = await Task.findOne({_id: req.params.id});
+        const allowedModifications = updateTaskRequestWhiteList(req.body); //trim the request and only get allowed fields to update
+        const task = await Task.findOne({_id: req.params.id}); //check if task exists 
         if(!task) return res.status(404).send({error: `task not found`});
-        //iterate through all of the whitelisted fields for modification
-        allowedModifications.forEach((field) => {
+        allowedModifications.forEach((field) => { //iterate through all of the whitelisted fields for modification
             task[field] = req.body[field]
         });
         await task.save();
@@ -61,8 +58,7 @@ router.patch('/api/task/complete/:id', async (req,res) => {
         if(task.state === 'DONE') return res.status(200).send(task);
         task.state = 'DONE';
         await task.save();
-        //mock email sending through console.log
-        console.log(`[EMAIL SENT][${task._id}] ${task.name} task COMPLETED!`);
+        console.log(`[EMAIL SENT][${task._id}] ${task.name} task COMPLETED!`);  //mock email sending through console.log
         res.status(200).send(task);
     } catch (error) {
         console.log(error.message);
@@ -90,7 +86,7 @@ router.delete('/api/task/:id', async (req,res) => {
 //  }
 router.delete('/api/tasks', async (req,res) => {
     try {
-        if(_.isEmpty(req.body.tasks)) return res.status(200).send({message: 'no tasks to delete'});
+        if(_.isEmpty(req.body.tasks)) return res.status(400).send({message: 'no tasks to delete!'});
         const deletedTasks = await Promise.all(req.body.tasks.map(async (taskID)=>{
             const task = await Task.findOne({_id: taskID});
             if(!task) return null;
@@ -104,6 +100,47 @@ router.delete('/api/tasks', async (req,res) => {
         const tasksDeleted = deletedTasks.filter((task) => task);
         res.status(200).send({
             tasksDeleted
+        });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send({error:error.message});
+    }
+});
+
+//Moves tasks to another list
+//  req.body = {
+//      tasks: Task ID[],
+//      destination: String (list name)
+//  }
+router.post('/api/task/move', async(req,res) => {
+    try {
+        if(_.isEmpty(req.body.tasks)) return res.status(400).send({message: 'no tasks to move!'});
+        const destination = await List.findOne({name: req.body.destination});
+        if(!destination) return res.status(400).send({message: 'destination list does not exist!'});
+        let results = await Promise.all(req.body.tasks.map(async(taskId)=>{ //find existing tasks where src list !== dst list
+            const task = await Task.findOne({_id: taskId});
+            if(!task) return null;
+            const srcList = await List.findOne({_id: task.listLocation});
+            if(!srcList) return null;
+            if(srcList.name === req.body.destination) return null;
+            return {task: taskId, src: srcList.name};
+        }));
+        results = results.filter((task)=>task);
+        const validTasks = results.map((task)=>task.task);
+        const affectedLists = [...new Set(results.map((task)=>task.src)), destination.name]; //get all unique affected source lists
+        validTasks.forEach(async(taskId)=>{ //update listLocation of all valid tasks
+            await Task.findOneAndUpdate({_id: taskId},{listLocation: destination._id});
+        });
+        affectedLists.forEach(async(listName)=>{
+            //fetch all tasks with listLocation equal to listName, and then insert it to affected list.tasks
+            const list = await List.findOne({name: listName});
+            const tasks = await Task.find({listLocation: list._id});
+            const taskIds = tasks.map((task)=>task._id);
+            await List.updateOne({_id: list._id}, {tasks: taskIds});
+        });
+        res.status(200).send({
+            tasksMoved: validTasks,
+            listsUpdated: affectedLists
         });
     } catch (error) {
         console.log(error.message);

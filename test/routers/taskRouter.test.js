@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../../app.js');
-const {initializeDBWithPopulatedList, initializeDBWithMultipleTasks, taskFixtureId} = require('../helpers/db-fixtures');
+const {initializeDBWithPopulatedList, initializeDBWithMultipleTasks, initializeDBWithMultipleLists, taskFixtureId} = require('../helpers/db-fixtures');
 const mongoose = require('mongoose');
 
 describe('task router', () => {
@@ -130,8 +130,35 @@ describe('task router', () => {
         test("Should respond with message 'no tasks to delete' when req.body.tasks is empty", async()=>{
             const res = await request(app).delete('/api/tasks').send({
                 tasks: []
+            }).expect(400);
+            expect(res.body.message).toBe('no tasks to delete!');
+        });
+    });
+
+    describe('POST /api/task/move', () => {
+        let dbInfo;
+        beforeEach(async()=>{
+            dbInfo = await initializeDBWithMultipleLists(2, 2);
+        });
+        test("Should be able to move multiple tasks to other lists", async()=>{
+            const res = await request(app).post('/api/task/move').send({
+                tasks: dbInfo[0].tasks,
+                destination: dbInfo[1].listName
             }).expect(200);
-            expect(res.body.message).toBe('no tasks to delete');
+            expect(res.body).toEqual({
+                tasksMoved: dbInfo[0].tasks,
+                listsUpdated: ['List0', 'List1']
+            });
+        });
+        test("Should be able to move a single task to other lists", async()=>{
+            const res = await request(app).post('/api/task/move').send({
+                tasks: [dbInfo[0].tasks[0]],
+                destination: dbInfo[1].listName
+            }).expect(200);
+            expect(res.body).toEqual({
+                tasksMoved: [dbInfo[0].tasks[0]],
+                listsUpdated: ['List0', 'List1']
+            });
         });
     });
 });

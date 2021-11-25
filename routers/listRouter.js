@@ -3,7 +3,6 @@ const List = require('../db/models/lists-model');
 const Task = require('../db/models/tasks-model');
 const router = new express.Router();
 const _ = require('lodash');
-const mongoose = require('mongoose');
 
 //Creates a new list
 //  req.body = {
@@ -51,11 +50,9 @@ router.get('/api/list/:name', async(req,res)=>{
 //  }
 router.post('/api/list/:name/newtask', async (req,res)=>{
     try {
-        //check first if list with specific name exists
-        const list = await List.findOne({name: req.params.name}).populate('tasks');
+        const list = await List.findOne({name: req.params.name}).populate('tasks');  //check first if list with specific name exists
         if(!list) return res.status(404).send({message: `list '${req.params.name}' not found!`});
-        //if list exists create new task
-        const newTask = new Task({
+        const newTask = new Task({  //if list exists create new task
             name: req.body.name,
             description: req.body.description,
             deadline: req.body.deadline, 
