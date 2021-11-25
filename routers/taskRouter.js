@@ -127,7 +127,8 @@ router.post('/api/task/move', async(req,res) => {
         }));
         results = results.filter((task)=>task);
         const validTasks = results.map((task)=>task.task);
-        const affectedLists = [...new Set(results.map((task)=>task.src)), destination.name]; //get all unique affected source lists
+        const affectedLists = [...new Set(results.map((task)=>task.src))]; //get all unique affected source lists
+        if(!_.isEmpty(validTasks)) affectedLists.push(destination.name);
         validTasks.forEach(async(taskId)=>{ //update listLocation of all valid tasks
             await Task.findOneAndUpdate({_id: taskId},{listLocation: destination._id});
         });
