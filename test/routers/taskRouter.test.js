@@ -145,20 +145,14 @@ describe('task router', () => {
                 tasks: dbInfo[0].tasks,
                 destination: dbInfo[1].listName
             }).expect(200);
-            expect(res.body).toEqual({
-                tasksMoved: dbInfo[0].tasks,
-                listsUpdated: ['List0', 'List1']
-            });
+            expect(res.body.tasksMoved).toEqual(dbInfo[0].tasks);
         });
         test("Should be able to move a single task to other lists", async()=>{
             const res = await request(app).post('/api/task/move').send({
                 tasks: [dbInfo[0].tasks[0]],
                 destination: dbInfo[1].listName
             }).expect(200);
-            expect(res.body).toEqual({
-                tasksMoved: [dbInfo[0].tasks[0]],
-                listsUpdated: ['List0', 'List1']
-            });
+            expect(res.body.tasksMoved).toEqual([dbInfo[0].tasks[0]]);
         });
     });
 });

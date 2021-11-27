@@ -132,16 +132,17 @@ router.post('/api/task/move', async(req,res) => {
         validTasks.forEach(async(taskId)=>{ //update listLocation of all valid tasks
             await Task.findOneAndUpdate({_id: taskId},{listLocation: destination._id});
         });
-        affectedLists.forEach(async(listName)=>{
+        const listsUpdated = await Promise.all(affectedLists.map(async(listName)=>{
             //fetch all tasks with listLocation equal to listName, and then insert it to affected list.tasks
             const list = await List.findOne({name: listName});
             const tasks = await Task.find({listLocation: list._id});
             const taskIds = tasks.map((task)=>task._id);
             await List.updateOne({_id: list._id}, {tasks: taskIds});
-        });
+            return await List.findOne({name: listName}).populate('tasks'); //return update list
+        }));
         res.status(200).send({
             tasksMoved: validTasks,
-            listsUpdated: affectedLists
+            listsUpdated
         });
     } catch (error) {
         console.log(error.message);
