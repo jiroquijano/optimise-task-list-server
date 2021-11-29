@@ -117,7 +117,9 @@ router.post('/api/task/move', async(req,res) => {
         if(_.isEmpty(req.body.tasks)) return res.status(400).send({message: 'no tasks to move!'});
         const destination = await List.findOne({name: req.body.destination});
         if(!destination) return res.status(400).send({message: 'destination list does not exist!'});
-        let results = await Promise.all(req.body.tasks.map(async(taskId)=>{ //find existing tasks where src list !== dst list
+        
+        //find existing tasks where src list !== dst list
+        let results = await Promise.all(req.body.tasks.map(async(taskId)=>{
             const task = await Task.findOne({_id: taskId});
             if(!task) return null;
             const srcList = await List.findOne({_id: task.listLocation});
@@ -125,21 +127,27 @@ router.post('/api/task/move', async(req,res) => {
             if(srcList.name === req.body.destination) return null;
             return {task: taskId, src: srcList.name};
         }));
+
         results = results.filter((task)=>task);
+
         const validTasks = results.map((task)=>task.task);
         const affectedLists = [...new Set(results.map((task)=>task.src))]; //get all unique affected source lists
         if(!_.isEmpty(validTasks)) affectedLists.push(destination.name);
-        validTasks.forEach(async(taskId)=>{ //update listLocation of all valid tasks
+
+        //update listLocation of all valid tasks
+        validTasks.forEach(async(taskId)=>{
             await Task.findOneAndUpdate({_id: taskId},{listLocation: destination._id});
         });
+
+         //fetch all tasks with listLocation equal to listName, and then insert it to affected list.tasks
         const listsUpdated = await Promise.all(affectedLists.map(async(listName)=>{
-            //fetch all tasks with listLocation equal to listName, and then insert it to affected list.tasks
             const list = await List.findOne({name: listName});
             const tasks = await Task.find({listLocation: list._id});
             const taskIds = tasks.map((task)=>task._id);
             await List.updateOne({_id: list._id}, {tasks: taskIds});
-            return await List.findOne({name: listName}).populate('tasks'); //return update list
+            return await List.findOne({name: listName}).populate('tasks'); //return updated list
         }));
+
         res.status(200).send({
             tasksMoved: validTasks,
             listsUpdated
