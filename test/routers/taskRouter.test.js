@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../../app.js');
-const {initializeDBWithPopulatedList, initializeDBWithMultipleTasks, initializeDBWithMultipleLists, taskFixtureId} = require('../helpers/db-fixtures');
+const {initializeDBWithPopulatedList, initializeDBWithMultipleTasks, initializeDBWithMultipleLists, taskFixtureId, listFixtureId} = require('../helpers/db-fixtures');
 const mongoose = require('mongoose');
 
 describe('task router', () => {
@@ -15,6 +15,7 @@ describe('task router', () => {
                 {
                     _id: expect.anything(),
                     name: 'Task1',
+                    listLocation: String(listFixtureId),
                     description: 'sample description',
                     deadline: expect.anything(),
                     state: 'ONGOING',
@@ -34,6 +35,7 @@ describe('task router', () => {
                 {
                     _id: String(taskFixtureId),
                     name: 'Task1',
+                    listLocation: String(listFixtureId),
                     description: 'sample description',
                     deadline: expect.anything(),
                     state: 'ONGOING',
@@ -103,6 +105,7 @@ describe('task router', () => {
             expect(res.body).toEqual({
                 _id: String(taskFixtureId),
                 name: 'Task1',
+                listLocation: String(listFixtureId),
                 description: 'sample description',
                 deadline: expect.anything(),
                 state: 'ONGOING',

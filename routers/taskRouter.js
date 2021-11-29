@@ -71,6 +71,11 @@ router.delete('/api/task/:id', async (req,res) => {
     try {
         const task = await Task.findOne({_id: req.params.id});
         if(!task) return res.status(404).send({error: `task not found`});
+        const list = await List.findOne({_id: task.listLocation});
+        if(!list) return res.status(404).send({error: 'task\'s list not found'});
+  
+        list.tasks.splice(list.tasks.indexOf(task._id), 1);
+        await List.updateOne({_id: list._id},{tasks: list.tasks});
         const taskCopy = _.cloneDeep(task);
         await Task.deleteOne({_id: req.params.id});
         res.status(200).send(taskCopy);
@@ -92,6 +97,7 @@ router.delete('/api/tasks', async (req,res) => {
             if(!task) return null;
             const list = await List.findOne({_id: task.listLocation});
             if(!list) return null;
+
             list.tasks.splice(list.tasks.indexOf(task._id), 1);
             await List.updateOne({_id: list._id},{tasks: list.tasks});
             const result = await Task.deleteOne({_id: taskID});

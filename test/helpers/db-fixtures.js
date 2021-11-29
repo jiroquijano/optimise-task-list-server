@@ -7,6 +7,7 @@ const taskFixtureId = mongoose.Types.ObjectId();
 const sampleTaskFixture = {
     _id: taskFixtureId,
     name: 'Task1',
+    listLocation: listFixtureId,
     description: 'sample description',
     deadline: '01/01/2021'
 };
@@ -86,5 +87,5 @@ module.exports = {
     initializeDBWithMultipleTasks,
     initializeDBWithMultipleLists,
     taskFixtureId,
-
+    listFixtureId
 }
