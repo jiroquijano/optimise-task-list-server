@@ -14,7 +14,7 @@ Express backend application for the taskboard application. Uses optimise-taskboa
 2. install npm dependencies `npm i`
 3. set the environment variables (MONGO_URL, PORT, CHECK_DUE_INTERVAL) under 'dev.env' config file, then run the application via `npm run start`
     - or alternatively, supply the env variable info on npm run like so:
-    - `export MONGO_URL="<<connection string>>" && npm run start
+    - `export MONGO_URL="mongodb connection string" && npm run start
 
 ### Running tests on local machine
 1. update the MONGO_URL connection string under 'test.env' config file.
