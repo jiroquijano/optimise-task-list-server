@@ -114,7 +114,7 @@ describe('task router', () => {
         });
     });
 
-    describe('DELETE /api/tasks', () => {
+    describe('POST /api/task/delete', () => {
         let arrayOfObjectIds = [];
 
         beforeEach(async()=>{
@@ -124,14 +124,24 @@ describe('task router', () => {
             await initializeDBWithMultipleTasks(arrayOfObjectIds);
         });
         test("Should be able to delete tasks specified in the req.body.tasks", async()=>{
-            const res = await request(app).delete('/api/tasks').send({
+            const res = await request(app).post('/api/task/delete').send({
                 tasks: [...arrayOfObjectIds]
             }).expect(200);
-            expect(res.body).toEqual({tasksDeleted: arrayOfObjectIds});
+            expect(res.body).toEqual({
+                listsUpdated: [
+                    {
+                        __v: 0,
+                        _id: expect.anything(),
+                        name: 'List1',
+                        tasks: []
+                    }
+                ],
+                tasksDeleted: arrayOfObjectIds
+            });
         });
 
         test("Should respond with message 'no tasks to delete' when req.body.tasks is empty", async()=>{
-            const res = await request(app).delete('/api/tasks').send({
+            const res = await request(app).post('/api/task/delete').send({
                 tasks: []
             }).expect(400);
             expect(res.body.message).toBe('no tasks to delete!');

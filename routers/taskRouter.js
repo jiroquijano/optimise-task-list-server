@@ -89,23 +89,36 @@ router.delete('/api/task/:id', async (req,res) => {
 //  req.body = {
 //      "tasks": Task ID []
 //  }
-router.delete('/api/tasks', async (req,res) => {
+router.post('/api/task/delete', async (req,res) => {
     try {
         if(_.isEmpty(req.body.tasks)) return res.status(400).send({message: 'no tasks to delete!'});
-        const deletedTasks = await Promise.all(req.body.tasks.map(async (taskID)=>{
+        let results = await Promise.all(req.body.tasks.map(async (taskID)=>{
             const task = await Task.findOne({_id: taskID});
             if(!task) return null;
             const list = await List.findOne({_id: task.listLocation});
             if(!list) return null;
-
-            list.tasks.splice(list.tasks.indexOf(task._id), 1);
-            await List.updateOne({_id: list._id},{tasks: list.tasks});
-            const result = await Task.deleteOne({_id: taskID});
-            if(result) return taskID;
+            return {task: taskID, listLocation: list.name};
         }));
-        const tasksDeleted = deletedTasks.filter((task) => task);
+
+        results = results.filter((task)=>task);
+        const validTasks = results.map((task)=>task.task);
+        const affectedLists = [...new Set(results.map((task)=>task.listLocation))]; //get all unique affected source lists
+
+        validTasks.forEach(async(taskId)=>{
+            await Task.deleteOne({_id: taskId});
+        });
+
+        const listsUpdated = await Promise.all(affectedLists.map(async(listName)=>{
+            const list = await List.findOne({name: listName});
+            const tasks = await Task.find({listLocation: list._id});
+            const taskIds = _.isEmpty(tasks) ? [] : tasks.map((task)=>task._id); //possible that all tasks were deleted
+            await List.updateOne({_id: list._id}, {tasks: taskIds});
+            return await List.findOne({name: listName}).populate('tasks'); //return updated list
+        }));
+
         res.status(200).send({
-            tasksDeleted
+            tasksDeleted: validTasks,
+            listsUpdated
         });
     } catch (error) {
         console.log(error.message);
