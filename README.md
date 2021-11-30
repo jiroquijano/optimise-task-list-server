@@ -18,7 +18,7 @@ Express backend application for the taskboard application. Uses optimise-taskboa
 
 ## Running the dockerized version of the server on local machine (option 2)
 1. cd into root directory of optimise-task-list-server
-2. set the environment variables (MONGO_URL [required], CHECK_DUE_INTERVAL [optional]) in the 'dev.env' config file
+2. set the environment variables (MONGO_URL [required], CHECK_DUE_INTERVAL [optional]) in the 'dev.env' config file (located at ./config directory)
 3. build the docker image via `docker build -t taskboard-server .` command
 4. run the built docker image via `docker run -p 4000:4000 --name taskboard-server-app taskboard-server`.
 
