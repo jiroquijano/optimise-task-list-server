@@ -1,4 +1,4 @@
-# Optimise-taskboard-client
+# Optimise-taskboard-server
 Express backend application for the taskboard application. Uses optimise-taskboard-client as frontend.
 
 ### Node version
